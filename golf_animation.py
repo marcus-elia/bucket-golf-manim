@@ -1,5 +1,6 @@
 
 from manim import *
+from shapely.geometry import Polygon as ShapelyPolygon, box
 from golf_data import (
     YARD, OBSTACLES, START, HOLE, GOLFERS,
     TITLE, PREVIOUS_SCORES,
@@ -16,38 +17,75 @@ LANDING_RADIUS = 0.035
 
 
 class BackyardGolf(Scene):
+    def xy(self, point):
+        x, y = point
+        return np.array([
+            (x - YARD["width"] / 2) * self.scale,
+            (y - YARD["height"] / 2) * self.scale - 0.1,
+            0,
+        ])
+
+    def make_lawn_stripes(self):
+        stripes = VGroup()
+        stripe_width = 8  # feet
+        colors = ["#A8D58D", "#70B85A"]
+
+        width = YARD["width"]
+        height = YARD["height"]
+        yard_shape = box(0, 0, width, height)
+
+        x = -height
+        index = 0
+
+        while x < width:
+            band = ShapelyPolygon([
+                (x, 0),
+                (x + stripe_width, 0),
+                (x + stripe_width + height, height),
+                (x + height, height),
+            ])
+
+            clipped = band.intersection(yard_shape)
+
+            if not clipped.is_empty:
+                polygons = [clipped] if clipped.geom_type == "Polygon" else list(clipped.geoms)
+
+                for poly in polygons:
+                    if poly.geom_type == "Polygon":
+                        points = [self.xy((px, py)) for px, py in list(poly.exterior.coords)[:-1]]
+                        stripes.add(Polygon(*points, stroke_width=0, fill_color=colors[index % 2], fill_opacity=1))
+
+            x += stripe_width
+            index += 1
+
+        return stripes
+
     def construct(self):
         self.camera.background_color = "#19251D"
 
-        scale = min(
+        self.scale = min(
             10.0 / YARD["width"],
             5.3 / YARD["height"],
         )
-
-        def xy(point):
-            x, y = point
-            return np.array([
-                (x - YARD["width"] / 2) * scale,
-                (y - YARD["height"] / 2) * scale - 0.1,
-                0,
-            ])
 
         # ----------------------------
         # Draw the yard
         # ----------------------------
 
         yard = Rectangle(
-            width=YARD["width"] * scale,
-            height=YARD["height"] * scale,
+            width=YARD["width"] * self.scale,
+            height=YARD["height"] * self.scale,
             stroke_color=WHITE,
             stroke_width=1.5,
             fill_color="#315C38",
             fill_opacity=1,
         ).move_to(
-            xy((YARD["width"] / 2, YARD["height"] / 2))
+            self.xy((YARD["width"] / 2, YARD["height"] / 2))
         )
 
         self.add(yard)
+
+        self.add(self.make_lawn_stripes())
 
         for obstacle in OBSTACLES:
             center = (
@@ -56,27 +94,27 @@ class BackyardGolf(Scene):
             )
 
             rect = Rectangle(
-                width=obstacle["width"] * scale,
-                height=obstacle["height"] * scale,
+                width=obstacle["width"] * self.scale,
+                height=obstacle["height"] * self.scale,
                 stroke_color="#E5E5E5",
                 stroke_width=1,
                 fill_color=obstacle["color"],
                 fill_opacity=1,
-            ).move_to(xy(center))
+            ).move_to(self.xy(center))
 
             label = Text(
                 obstacle["name"],
                 font_size=14,
                 color=WHITE,
-            ).move_to(xy(center))
+            ).move_to(self.xy(center))
 
             self.add(rect, label)
 
         # Tee marker.
         self.add(
-            Dot(xy(START), radius=0.07, color=WHITE),
+            Dot(self.xy(START), radius=0.07, color=WHITE),
             Text("START", font_size=13).next_to(
-                xy(START), DOWN, buff=0.08
+                self.xy(START), DOWN, buff=0.08
             ),
         )
 
@@ -86,13 +124,13 @@ class BackyardGolf(Scene):
                 radius=0.10,
                 color=WHITE,
                 stroke_width=2,
-            ).move_to(xy(HOLE)),
-            Dot(xy(HOLE), radius=0.035, color=BLACK),
+            ).move_to(self.xy(HOLE)),
+            Dot(self.xy(HOLE), radius=0.035, color=BLACK),
         )
 
         flagpole = Line(
-            xy(HOLE),
-            xy(HOLE) + UP * 0.42,
+            self.xy(HOLE),
+            self.xy(HOLE) + UP * 0.42,
             color=WHITE,
             stroke_width=2,
         )
@@ -105,7 +143,7 @@ class BackyardGolf(Scene):
         ).scale(0.16)
 
         flag.rotate(-PI / 2)
-        flag.move_to(xy(HOLE) + UP * 0.32 + RIGHT * 0.13)
+        flag.move_to(self.xy(HOLE) + UP * 0.32 + RIGHT * 0.13)
 
         self.add(flagpole, flag)
 
@@ -160,8 +198,8 @@ class BackyardGolf(Scene):
         # ----------------------------
 
         def make_shot_path(start, end, curve_side=1):
-            p0 = xy(start)
-            p2 = xy(end)
+            p0 = self.xy(start)
+            p2 = self.xy(end)
 
             direction = p2 - p0
             distance = np.linalg.norm(direction[:2])
@@ -219,7 +257,7 @@ class BackyardGolf(Scene):
                 color = data["color"]
 
                 ball = Dot(
-                    xy(start),
+                    self.xy(start),
                     radius=BALL_RADIUS,
                     color=color,
                     stroke_color=WHITE,
@@ -259,8 +297,8 @@ class BackyardGolf(Scene):
                 # Permanent marker at the landing point.
                 self.add(
                     Dot(
-                        xy(end),
-                        radius=LANDING_RADIUS,
+                        self.xy(end),
+                        radius=BALL_RADIUS,
                         color=color,
                     )
                 )
@@ -283,7 +321,7 @@ class BackyardGolf(Scene):
         # ----------------------------
 
         final_rows = [
-            Text("FINAL SCORES", font_size=25, color=WHITE)
+            Text("SCORES", font_size=25, color=WHITE)
         ]
 
         for name, data in GOLFERS.items():

@@ -1,69 +1,85 @@
-TITLE = "Backyard Golf - Hole 1"
+TITLE = "Bucket Golf - Hole 1"
 
 PREVIOUS_SCORES = {
-    "Alex": 0,
-    "Jordan": 0,
-    "Sam": 0,
+    "Beard": 0,
+    "Pants": 0,
+    "Shades": 0,
+    "Golf Man": 0,
 }
 
 YARD = {
-    "width": 100,
-    "height": 70,
+    "width": 180,
+    "height": 140,
 }
 
 OBSTACLES = [
     {
         "name": "House",
-        "x": 10, "y": 35,
-        "width": 35, "height": 25,
+        "x": 55, "y": 65,
+        "width": 50, "height": 30,
         "color": "#858585",
     },
     {
         "name": "Garage",
-        "x": 60, "y": 45,
-        "width": 20, "height": 15,
+        "x": 30, "y": 80,
+        "width": 25, "height": 24,
         "color": "#B09A83",
     },
     {
-        "name": "Garden Bed",
-        "x": 55, "y": 10,
-        "width": 20, "height": 8,
+        "name": "Garden",
+        "x": 150, "y": 65,
+        "width": 8, "height": 16,
         "color": "#795548",
+    },
+    {
+        "name": "Driveway",
+        "x": 31, "y": 0,
+        "width": 23, "height": 80,
+        "color": "#050505",
     },
 ]
 
-START = (5, 5)
-HOLE = (90, 60)
+START = (8, 45)
+HOLE = (55, 120)
 
 GOLFERS = {
-    "Alex": {
-        "color": "#42A5F5",
+    "Beard": {
+        "color": "#ffffff",
         "shots": [
-            (5, 5),
-            (25, 15),
-            (45, 20),
-            (70, 30),
-            (90, 60),
+            (8, 45),
+            (8, 110),
+            (13, 100),
+            (59, 124),
+            (51, 116),
+            (55, 120)
         ],
     },
-    "Jordan": {
-        "color": "#FFCA28",
+    "Pants": {
+        "color": "#c78006",
         "shots": [
-            (5, 5),
-            (20, 25),
-            (45, 30),
-            (75, 35),
-            (90, 60),
+            (8, 45),
+            (35, 120),
+            (70, 118),
+            (65, 119),
+            (55, 120),
         ],
     },
-    "Sam": {
-        "color": "#EF5350",
+    "Shades": {
+        "color": "#3492eb",
         "shots": [
-            (5, 5),
-            (30, 10),
-            (50, 25),
-            (80, 45),
-            (90, 60),
+            (8, 45),
+            (40, 110),
+            (55, 121),
+            (55, 120),
         ],
     },
+    "Golf Man": {
+            "color": "#4f4f4f",
+            "shots": [
+                (8, 45),
+                (40, 125),
+                (58, 124),
+                (55, 120),
+            ],
+        }
 }
